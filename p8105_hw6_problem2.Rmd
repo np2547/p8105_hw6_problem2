@@ -24,8 +24,10 @@ ny_noaa = read_csv("../data/nynoaadat.zip") %>%
   separate(date, into = c("year", "month","day"), sep = "-") %>%
   filter(year >= 2000) %>%
   drop_na(prcp) %>%
-  select(year, month, day, prcp) %>%
-  mutate(month = as.numeric(month), day = as.numeric(day), year = as.factor(year))
+  select(id, year, month, day, prcp) %>%
+  mutate(month = as.numeric(month), day = as.numeric(day), year = as.factor(year)) %>%
+  group_by(month, day, id) %>%
+  mutate(prcp = mean(prcp))
   
 
 ```
@@ -43,7 +45,7 @@ renderPlotly({
     filter(year == input$year_choice) %>%
     plot_ly(x = ~month, y = ~prcp, type = "scatter", mode = "points",
           alpha = 0.5,
-          color = ~day)
+          color = ~prcp)
 })
 
 ```
