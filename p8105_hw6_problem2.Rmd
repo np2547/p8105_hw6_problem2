@@ -19,6 +19,7 @@ library(plotly)
 library(janitor)
 library(shiny)
 library(stringr)
+library(rsconnect)
 
 ny_noaa = read_csv("../data/nynoaadat.zip") %>%
   clean_names %>%
@@ -47,9 +48,10 @@ selectInput("year_choice", label = h3("Select year"),
 renderPlotly({
     ny_noaa %>%
     filter(year == input$year_choice) %>%
-    plot_ly(x = ~date, y = ~prcp, type = "scatter",
+    plot_ly(x = ~date, y = ~prcp, type = "scatter", mode = "lines",
           alpha = 0.5,
-          color = ~prcp)
+          color = ~prcp) %>%
+    layout(title = "Precipitation Trend Through the Year")
 })
 
 ```
