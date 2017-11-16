@@ -12,7 +12,45 @@ knitr::opts_chunk$set(echo = TRUE)
 library(forcats)
 library(tidyverse)
 library(dplyr)
+library(readr)
+library(plotly)
+library(janitor)
+library(shiny)
+
+ny_noaa = read_csv("../data/nynoaadat.zip") %>%
+  clean_names %>%
+  separate(date, into = c("year", "month","day"), sep = "-") %>%
+  filter(year >= 2000) %>%
+  drop_na(prcp) %>%
+  select(year, month, day, prcp) %>%
+  mutate(month = as.numeric(month), day = as.numeric(day), year = factor(year))
+  
+
 ```
+
+```{r, echo = FALSE}
+
+# selectInput widget
+selectInput("year_choice", label = h3("Select year"),
+            choices = ny_noaa$year, selected = "2010")
+
+renderPrint({ 
+  input$year_choice
+})
+
+
+renderPlotly({
+    ny_noaa %>%
+    filter(year == input$year_choice) %>%
+           year %in% input$year_choice[1] %>%
+    plot_ly(x = ~month, y = ~prcp, type = "scatter", mode = "markers",
+          alpha = 0.5, 
+          color = ~day)
+})
+
+```
+
+
 
 This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
 
