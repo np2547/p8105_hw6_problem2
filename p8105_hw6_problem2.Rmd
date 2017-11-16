@@ -18,16 +18,20 @@ library(readr)
 library(plotly)
 library(janitor)
 library(shiny)
+library(stringr)
 
 ny_noaa = read_csv("../data/nynoaadat.zip") %>%
   clean_names %>%
   separate(date, into = c("year", "month","day"), sep = "-") %>%
   filter(year >= 2000) %>%
   drop_na(prcp) %>%
+  arrange(year, month, day) %>%
   select(id, year, month, day, prcp) %>%
-  mutate(month = as.numeric(month), day = as.numeric(day), year = as.factor(year)) %>%
-  group_by(month, day, id) %>%
-  mutate(prcp = mean(prcp))
+  mutate(year = as.factor(year), date = str_c(month, day, sep = ".")) %>%
+  select(-month, -day) %>%
+  group_by(year, date) %>%
+  mutate(prcp = mean(prcp)) %>%
+  ungroup()
   
 
 ```
@@ -43,7 +47,7 @@ selectInput("year_choice", label = h3("Select year"),
 renderPlotly({
     ny_noaa %>%
     filter(year == input$year_choice) %>%
-    plot_ly(x = ~month, y = ~prcp, type = "scatter", mode = "points",
+    plot_ly(x = ~date, y = ~prcp, type = "scatter",
           alpha = 0.5,
           color = ~prcp)
 })
