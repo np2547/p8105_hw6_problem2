@@ -58,37 +58,6 @@ renderPlotly({
 ### Chart B
 
 ```{r}
-#PLOT 3
-ny_noaa_plot_3 = ny_noaa %>%
-  mutate(year = as.numeric(year), 
-         tmax = as.numeric(tmax)) %>%
-  drop_na(tmax) %>%
-  select(year, month, day, tmax) %>%
-  group_by(year, month) %>%
-  summarize(tmax = mean(tmax)) %>%
-  ungroup()
-
-max_year = 2010
-min_year = 2000
-
-# sliderInput widget
-sliderInput("year_range", label = h3("Choose year range"), min = min_year,
-        max = max_year, value = c(2000, 2010))
-
-
-renderPlotly({
-    ny_noaa_plot_3 %>%
-    filter(year %in% input$year_range[1]:input$year_range[2]) %>%
-    plot_ly(x = ~month, y = ~tmax, type = "scatter",
-          alpha = 0.0001,
-          color = ~year) %>%
-    layout(title = "Maximum Temperature Through the Year")
-})
-```
-
-### Chart C
-
-```{r}
 #PLOT 2
 ny_noaa_plot_2 = ny_noaa %>%
   select(id, year, snow) %>%
@@ -114,5 +83,36 @@ renderPlotly({
     filter(year == input$year_choice) %>%
     plot_ly(x = ~id, y = ~snow, type = "scatter", color = ~year) %>%
     layout(title = "Station Accumulation Across the Years")
+})
+```
+
+### Chart C
+
+```{r}
+#PLOT 3
+ny_noaa_plot_3 = ny_noaa %>%
+  mutate(year = as.numeric(year), 
+         tmax = as.numeric(tmax)) %>%
+  drop_na(tmax) %>%
+  select(year, month, day, tmax) %>%
+  group_by(year, month) %>%
+  summarize(tmax = mean(tmax)) %>%
+  ungroup()
+
+max_year = 2010
+min_year = 2000
+
+# sliderInput widget
+sliderInput("year_range", label = h3("Choose year range"), min = min_year,
+        max = max_year, value = c(2000, 2010))
+
+
+renderPlotly({
+    ny_noaa_plot_3 %>%
+    filter(year %in% input$year_range[1]:input$year_range[2]) %>%
+    plot_ly(x = ~month, y = ~tmax, type = "scatter",
+          alpha = 0.0001,
+          color = ~year) %>%
+    layout(title = "Maximum Temperature Through the Year")
 })
 ```
