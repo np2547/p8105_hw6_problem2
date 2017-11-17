@@ -101,18 +101,18 @@ ny_noaa_plot_2 = ny_noaa %>%
   group_by(year) %>%
   top_n(15)
 
-max_year = 2010
-min_year = 2000
+which_year = ny_noaa_plot_1 %>% distinct(year) %>% pull()
 
-# sliderInput widget
-sliderInput("year_choice", label = h3("select year"), min = min_year,
-        max = max_year, value = c(2000, 2010))
+
+# selectInput widget
+selectInput("year_choice", label = h3("Select year"),
+            choices = which_year, selected = "2010")
 
 
 renderPlotly({
     ny_noaa_plot_2 %>%
     filter(year == input$year_choice) %>%
-    plot_ly(x = ~id, y = ~snow, type = "box", color = ~year) %>%
+    plot_ly(x = ~id, y = ~snow, type = "boxplot", color = ~year) %>%
     layout(title = "Station Accumulation Across the Years")
 })
 ```
