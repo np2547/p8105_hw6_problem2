@@ -62,28 +62,26 @@ renderPlotly({
 ny_noaa_plot_2 = ny_noaa %>%
   select(id, year, snow) %>%
   drop_na(snow) %>%
-  group_by(id, year) %>%
+  group_by(year, id) %>%
   summarize(snow = sum(snow)) %>%
   ungroup() %>%
-  mutate(id = as.factor(id),
-         id = fct_reorder(id, snow)) %>%
+  mutate(year = as.factor(year),
+         year = fct_reorder(year, snow)) %>%
   group_by(year) %>%
-  top_n(15)
+  top_n(15) 
 
-which_year = ny_noaa_plot_2 %>% distinct(year) %>% pull()
-
+which_year_2 = ny_noaa_plot_2 %>% distinct(year) %>% pull()
 
 # selectInput widget
-selectInput("year_choice", label = h3("Select year"),
-            choices = which_year, selected = "2010")
-
+selectInput("year_choice_2", label = h3("Select year"),
+            choices = which_year_2, selected = "2000")
 
 renderPlotly({
     ny_noaa_plot_2 %>%
-    filter(year == input$year_choice) %>%
-    plot_ly(x = ~id, y = ~snow, type = "scatter", color = ~year) %>%
-    layout(title = "Station Accumulation Across the Years")
-})
+    filter(year == input$year_choice_2) %>%
+    plot_ly(x = ~id, y = ~snow, type = "bar") %>%
+    layout(title = "Snow Accumulation by Station By Year")
+  })
 ```
 
 ### Chart C
@@ -113,6 +111,6 @@ renderPlotly({
     plot_ly(x = ~month, y = ~tmax, type = "scatter",
           alpha = 0.0001,
           color = ~year) %>%
-    layout(title = "Maximum Temperature Through the Year")
+    layout(title = "Average Maximum Temperature Through the Year")
 })
 ```
