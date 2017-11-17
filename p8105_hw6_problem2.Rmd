@@ -1,16 +1,13 @@
 ---
 title: "Untitled"
-author: "Nadiya Pavlishyn"
-date: "11/14/2017"
 output: 
   flexdashboard::flex_dashboard:
     orientation: row
-  runtime: shiny
+runtime: shiny
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
+```{r}
+library(flexdashboard)
 library(forcats)
 library(tidyverse)
 library(dplyr)
@@ -24,7 +21,9 @@ library(rsconnect)
 ny_noaa = read_csv("../data/nynoaadat.zip") %>%
   clean_names %>%
   separate(date, into = c("year", "month","day"), sep = "-") %>%
-  filter(year >= 2000) %>%
+  filter(year >= 2000)
+
+ny_noaa_plot_1 = ny_noaa %>%
   drop_na(prcp) %>%
   arrange(year, month, day) %>%
   select(id, year, month, day, prcp) %>%
@@ -33,12 +32,9 @@ ny_noaa = read_csv("../data/nynoaadat.zip") %>%
   group_by(year, date) %>%
   mutate(prcp = mean(prcp)) %>%
   ungroup()
-  
 
-```
 
-```{r, echo = FALSE}
-which_year = ny_noaa %>% distinct(year) %>% pull()
+which_year = ny_noaa_plot_1 %>% distinct(year) %>% pull()
 
 
 # selectInput widget
@@ -46,15 +42,54 @@ selectInput("year_choice", label = h3("Select year"),
             choices = which_year, selected = "2010")
 
 renderPlotly({
-    ny_noaa %>%
+    ny_noaa_plot_1 %>%
     filter(year == input$year_choice) %>%
     plot_ly(x = ~date, y = ~prcp, type = "scatter", mode = "lines",
           alpha = 0.5,
           color = ~prcp) %>%
     layout(title = "Precipitation Trend Through the Year")
 })
+```
+
+Row {.tabset .tabset-fade}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+#PLOT 3
+ny_noaa_plot_3 = ny_noaa %>%
+  mutate(year = as.numeric(year), tmax = as.numeric(tmax)) %>%
+  drop_na(tmax) %>%
+  select(year, month, day, tmax) %>%
+  group_by(year, month) %>%
+  summarize(tmax = mean(tmax)) %>%
+  ungroup()
+
+max_year = 2010
+min_year = 2000
+
+# sliderInput widget
+sliderInput("year_range", label = h3("Choose year range"), min = min_year,
+        max = max_year, value = c(2000, 2010))
+
+
+renderPlotly({
+    ny_noaa_plot_3 %>%
+    filter(year %in% input$year_range[1]:input$year_range[2]) %>%
+    plot_ly(x = ~month, y = ~tmax, type = "scatter",
+          alpha = 0.0001,
+          color = ~tmax) %>%
+    layout(title = "Maximum Temperature Through the Year")
+})
+```
+
+### Chart C
+
+```{r}
+
 
 ```
-This plot was created using the NYNOAA dataset. For more information on how these plots were created, please click here.
-```{r}
-```
+
+
+
