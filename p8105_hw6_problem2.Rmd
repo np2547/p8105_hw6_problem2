@@ -21,7 +21,11 @@ library(rsconnect)
 ny_noaa = read_csv("../data/nynoaadat.zip") %>%
   clean_names %>%
   separate(date, into = c("year", "month","day"), sep = "-") %>%
-  filter(year >= 2000)
+  filter(year >= 2000) %>%
+  mutate(tmin = as.numeric(tmin),
+         tmax = as.numeric(tmax),
+         tmin = (tmin/10),
+         tmax = (tmax/10))
 
 ny_noaa_plot_1 = ny_noaa %>%
   drop_na(prcp) %>%
