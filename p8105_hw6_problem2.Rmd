@@ -60,7 +60,8 @@ renderPlotly({
 ```{r}
 #PLOT 3
 ny_noaa_plot_3 = ny_noaa %>%
-  mutate(year = as.numeric(year), tmax = as.numeric(tmax)) %>%
+  mutate(year = as.numeric(year), 
+         tmax = as.numeric(tmax)) %>%
   drop_na(tmax) %>%
   select(year, month, day, tmax) %>%
   group_by(year, month) %>%
@@ -88,9 +89,30 @@ renderPlotly({
 ### Chart C
 
 ```{r}
+#PLOT 2
+ny_noaa_plot_2 = ny_noaa %>%
+  select(id, year, snow) %>%
+  group_by(id, year) %>% 
+  drop_na(snow) %>%
+  summarize(snow = sum(snow)) %>%
+  ungroup() %>%
+  mutate(snow = as.numeric(snow),
+         id = fct_reorder(id, snow)) %>%
+  group_by(year) %>%
+  top_n(15)
+
+max_year = 2010
+min_year = 2000
+
+# sliderInput widget
+sliderInput("year_choice", label = h3("select year"), min = min_year,
+        max = max_year, value = c(2000, 2010))
 
 
+renderPlotly({
+    ny_noaa_plot_2 %>%
+    filter(year == input$year_choice) %>%
+    plot_ly(x = ~id, y = ~prcp, type = "box") %>%
+    layout(title = "Station Accumulation Across the Years")
+})
 ```
-
-
-
